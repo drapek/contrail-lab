@@ -88,7 +88,7 @@ resource "openstack_compute_floatingip_associate_v2" "floatip_1" {
       //"sudo docker exec $CONFIG_API_CONTAINER sed -i 's/def _request(/def _request_hacked_out(/g' /lib/python2.7/site-packages/vnc_openstack/neutron_plugin_db.py || return 1",
       //"sudo docker restart $CONFIG_API_CONTAINER || return 1",
       "sudo yum -y install tcpdump",
-      "sudo /usr/sbin/tcpdump -i any port 8082 -s0 -w /tmp/tcpdump_from_verybeggining.pcap"
+      "sudo /usr/sbin/tcpdump -i any port 8082 -s0 -w /tmp/tcpdump_from_verybeggining.pcap &"
     ]
   }
 

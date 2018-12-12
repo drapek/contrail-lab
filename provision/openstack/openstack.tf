@@ -79,17 +79,12 @@ resource "openstack_compute_floatingip_associate_v2" "floatip_1" {
       agent       = "false"
       host        = "${openstack_networking_floatingip_v2.floatip_1.address}"
       private_key = "${file(var.ssh_private_key)}"
-      timeout     = "5m"
+      timeout     = "10m"
     }
 
     inline = [
-      // Make the request to return more informations
-      //"export CONFIG_API_CONTAINER=$(sudo docker ps --format \"{{.Names}}\" | grep config_api)",
-      //"sudo docker exec $CONFIG_API_CONTAINER sed -i 's/def _request(/def _request_hacked_out(/g' /lib/python2.7/site-packages/vnc_openstack/neutron_plugin_db.py || return 1",
-      //"sudo docker restart $CONFIG_API_CONTAINER || return 1",
-      "sudo yum -y install tcpdump",
-      "sudo /usr/sbin/tcpdump -i any port 8082 -s0 -w /tmp/tcpdump_from_verybeggining.pcap &",
-      "sleep 1"
+      "sudo yum -y install tcpdump, screen",
+      "screen -d -m sudo /usr/sbin/tcpdump -i any port 8082 -s0 -w /tmp/tcpdump_from_verybeggining.pcap",
     ]
   }
 
@@ -213,6 +208,27 @@ resource "openstack_compute_floatingip_associate_v2" "floatip_1" {
     inline = [
       "cd ${local.contrail_path}",
       "ansible-playbook -e contrail_type=${var.contrail_type} -e contrail_path=${local.contrail_path} playbooks/contrail-go/deploy.yaml",
+    ]
+  }
+
+
+  // Start tcpdump on contrail_api port
+  provisioner "remote-exec" {
+    connection {
+      type        = "ssh"
+      user        = "centos"
+      password    = ""
+      agent       = "false"
+      host        = "${openstack_networking_floatingip_v2.floatip_1.address}"
+      private_key = "${file(var.ssh_private_key)}"
+      timeout     = "5m"
+    }
+
+    inline = [
+      // Make the request to return more detailed informations
+      "export CONFIG_API_CONTAINER=$(sudo docker ps --format \"{{.Names}}\" | grep config_api)",
+      "sudo docker exec $CONFIG_API_CONTAINER sed -i 's/def _request(/def _request_hacked_out(/g' /lib/python2.7/site-packages/vnc_openstack/neutron_plugin_db.py || return 1",
+      "sudo docker restart $CONFIG_API_CONTAINER || return 1",
     ]
   }
 

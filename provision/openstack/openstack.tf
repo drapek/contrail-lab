@@ -85,6 +85,7 @@ resource "openstack_compute_floatingip_associate_v2" "floatip_1" {
     inline = [
       "sudo yum -y install tcpdump screen",
       "screen -d -m sudo /usr/sbin/tcpdump -i any port 8082 -s0 -w /tmp/tcpdump_from_verybeggining.pcap",
+      "sleep 1"
     ]
   }
 
